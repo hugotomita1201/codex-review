@@ -1,0 +1,50 @@
+{
+  "description": "Codex review gate — detects file changes, tracks pending reviews, enforces review before session exit",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/codex_review_gate.py session-start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/codex_review_gate.py user-prompt",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/codex_review_gate.py post-tool",
+            "timeout": 10
+          }
+        ],
+        "matcher": "Write|Edit|MultiEdit|Bash"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/codex_review_gate.py stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

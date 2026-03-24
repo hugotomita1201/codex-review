@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "codex-review",
+  "owner": {
+    "name": "Hugo Tomita",
+    "email": "hugotomita@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "codex-review",
+      "description": "Automatic code review powered by OpenAI Codex CLI. Reviews plans and implementations as a second opinion.",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}

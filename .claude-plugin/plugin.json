@@ -1,0 +1,10 @@
+{
+  "name": "codex-review",
+  "version": "1.0.0",
+  "description": "Automatic code review powered by OpenAI Codex CLI. Codex reviews your plans and code as a second opinion — like having a senior engineer look over Claude's shoulder.",
+  "author": {
+    "name": "Hugo Tomita",
+    "email": "hugotomita@gmail.com"
+  },
+  "homepage": "https://github.com/hugotomita1201/codex-review"
+}
