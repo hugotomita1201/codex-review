@@ -311,8 +311,11 @@ def handle_post_tool(payload: dict[str, Any], state: dict[str, Any]) -> str | No
             archive_paths: list[str] = []
             summary_lines: list[str] = []
 
+            # v2: use output filename for review type detection (more reliable than command text)
+            output_name = Path(output_path).name.lower() if output_path else ""
+
             # Detect plan review completion
-            if "plan" in cmd.lower() and state["plan_pending"]:
+            if ("plan" in output_name or re.search(r'\bplan\b', cmd.lower())) and state["plan_pending"]:
                 state["plan_pending"] = False
                 state["plan_files"] = []
                 state["last_reviewed_at"] = datetime.now(timezone.utc).isoformat()
@@ -325,8 +328,8 @@ def handle_post_tool(payload: dict[str, Any], state: dict[str, Any]) -> str | No
                     preview = read_summary(output_path)
                     if preview:
                         summary_lines.append(preview)
-            # Detect implementation review completion
-            if ("code" in cmd.lower() or "targeted" in cmd.lower() or "impl" in cmd.lower()) and state["impl_pending"]:
+            # Detect implementation review completion (word boundary to avoid "code" matching "codex")
+            if (re.search(r'\b(?:code|targeted|impl)\b', output_name) or re.search(r'\b(?:code|targeted|impl)\b', cmd.lower())) and state["impl_pending"]:
                 state["impl_pending"] = False
                 state["impl_files"] = []
                 state["last_reviewed_at"] = datetime.now(timezone.utc).isoformat()
