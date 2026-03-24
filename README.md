@@ -6,21 +6,46 @@
 
 Every time Claude writes a plan or changes code, Codex reviews it as a second opinion — like having a senior engineer look over Claude's shoulder.
 
-## What it does
+> There are other Codex review plugins out there ([claude-review-loop](https://github.com/hamelsmu/claude-review-loop), [agent-peer-review](https://github.com/jcputney/agent-peer-review), [codex-skill](https://github.com/cathrynlavery/codex-skill)). What makes this one different is **multi-round review tracking** — when you fix issues and re-review, Codex sees its own previous findings and verifies they were actually addressed. This was battle-tested across hundreds of reviews on a production codebase before being extracted into a plugin.
 
-- **Detects file changes** — Hooks into Claude Code's Write/Edit events
-- **Tracks pending reviews** — Knows what's been reviewed and what hasn't
-- **Auto-triggers Codex** — Tells Claude to run Codex review immediately
-- **Blocks premature exit** — Circuit breaker prevents stopping with unreviewed changes
-- **Two review modes** — Plan review (strategy) and implementation review (code)
+## Why this exists
 
-## What's New in v2
+Most review plugins fire once and forget. In practice, the real value is in the **review loop**:
 
-- **Multi-round reviews** — When you fix issues and re-review, Codex sees the previous findings and verifies they were addressed
-- **PR review mode** — Review pull requests with `gh pr diff` via `/codex-review`
-- **Review history** — Previous findings stored durably in `.claude/reviews/` (not just `/tmp`)
-- **Summary preview** — Hook shows the first 3 lines of Codex findings in context, so Claude sees the headline immediately
-- **Configurable model** — Default `gpt-5.4` with `xhigh` reasoning effort. Override in `.codex-review.json`
+```
+Round 1: Codex finds 6 issues
+    → You fix 4 of them
+Round 2: Codex sees its previous findings + your fixes
+    → Confirms 4 addressed, flags 2 remaining + 1 new regression
+Round 3: Clean
+```
+
+Without round tracking, round 2 starts from scratch — it doesn't know what it already found. This plugin tracks review scope (which files), round number, and archives previous findings so Codex can verify its own work was addressed.
+
+## Features
+
+- **Multi-round review tracking** — Scope-hashed rounds with previous findings fed back to Codex
+- **Durable review history** — Findings archived to `.claude/reviews/` (survives between sessions)
+- **Three review modes** — Plan review, implementation review, and PR review
+- **Summary preview** — First 3 lines of findings shown in hook context (Claude sees the headline immediately)
+- **Circuit breaker** — Blocks session exit if review pending (allows override on second attempt)
+- **Configurable** — Model, reasoning effort, file paths, extensions — all via `.codex-review.json`
+- **"Skip codex"** — Say it to bypass the review gate when you need to move fast
+
+## How it compares
+
+| Feature | Other plugins | codex-review |
+|---------|--------------|--------------|
+| Auto-trigger on file changes | Yes | Yes |
+| Plan review | Some | Yes |
+| Implementation review | Some | Yes — targeted (≤5 files) or diff-based (>5 files) |
+| PR review | No | Yes — `gh pr diff` integration |
+| Multi-round tracking | **No** | **Yes — scope-hashed, feeds previous findings back** |
+| Review history | `/tmp` (lost) | `.claude/reviews/` (durable, versioned) |
+| Summary preview | No | Yes — first 3 lines in context |
+| Configurable model | Basic | `gpt-5.4` default, 6 reasoning effort levels |
+| Project config file | No | `.codex-review.json` with full customization |
+| Circuit breaker | Some | Yes — block once, allow on retry |
 
 ## How it works
 
